@@ -6,12 +6,14 @@ const multer = require("multer");
 
 const app = express();
 
-// MySQL connection
+require("dotenv").config();
+
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "root",
-    database: "food_portal",
+    host: process.env.Host,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
 });
 
 db.connect((err) => {
