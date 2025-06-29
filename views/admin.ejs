@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50">
+    <nav class="bg-white shadow p-4 flex justify-between">
+        <a href="/" class="text-red-500 font-bold text-xl">Food Portal</a>
+    </nav>
+
+    <section class="p-10">
+        <h1 class="text-3xl font-bold mb-5">Orders</h1>
+        <table class="min-w-full bg-white mb-10 border">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="py-2 px-4 border">Order ID</th>
+                    <th class="py-2 px-4 border">Food</th>
+                    <th class="py-2 px-4 border">Customer</th>
+                    <th class="py-2 px-4 border">Quantity</th>
+                    <th class="py-2 px-4 border">Date</th>
+                    <th class="py-2 px-4 border">Status</th>
+                    <th class="py-2 px-4 border">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% orders.forEach(order=> { %>
+                    <tr>
+                        <td class="py-2 px-4 border">
+                            <%= order.order_id %>
+                        </td>
+                        <td class="py-2 px-4 border">
+                            <%= order.food_name %>
+                        </td>
+                        <td class="py-2 px-4 border">
+                            <%= order.customer_name %>
+                        </td>
+                        <td class="py-2 px-4 border">
+                            <%= order.quantity %>
+                        </td>
+                        <td class="py-2 px-4 border">
+                            <%= order.order_date ? new Date(order.order_date).toISOString().slice(0, 10) : 'N/A' %>
+                        </td>
+                        <td class="py-2 px-4 border">
+                            <%= order.status %>
+                        </td>
+                        <td class="py-2 px-4 border">
+                            <% if (order.status !=="Completed" ) { %>
+                                <form action="/admin/complete-order/<%= order.order_id %>" method="POST"
+                                    class="inline-block">
+                                    <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded">
+                                        Complete
+                                    </button>
+                                </form>
+                                <% } else { %>
+                                    <span class="text-green-600 font-bold">Completed</span>
+                                    <% } %>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+
+        <h2 class="text-2xl font-bold mb-3">Add Food</h2>
+        <form action="/admin/add-food" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <input type="text" name="name" placeholder="Food Name" class="w-full p-2 border rounded" required>
+            <textarea name="description" placeholder="Description" class="w-full p-2 border rounded"></textarea>
+            <input type="number" name="price" placeholder="Price" step="0.01" class="w-full p-2 border rounded"
+                required>
+            <input type="file" name="image" class="w-full p-2 border rounded">
+            <button class="bg-red-500 text-white px-4 py-2 rounded">Add Food</button>
+        </form>
+
+        <h2 class="text-2xl font-bold mt-10 mb-3">Delete Food</h2>
+        <ul class="space-y-2">
+            <% foods.forEach(food=> { %>
+                <li>
+                    <form action="/admin/delete-food/<%= food.id %>" method="GET"
+                        onsubmit="return confirm('Are you sure you want to delete <%= food.name %>?');" class="inline">
+                        <button type="submit"
+                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded shadow transition">
+                            Delete <%= food.name %>
+                        </button>
+                    </form>
+                </li>
+                <% }) %>
+        </ul>
+
+    </section>
+</body>
+
+</html>
