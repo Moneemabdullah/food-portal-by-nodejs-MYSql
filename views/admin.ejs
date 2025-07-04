@@ -3,93 +3,188 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Admin</title>
+    <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Optional: Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-50">
-    <nav class="bg-white shadow p-4 flex justify-between">
-        <a href="/" class="text-red-500 font-bold text-xl">Food Portal</a>
-    </nav>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <nav class="bg-white shadow p-4 flex justify-between items-center fixed w-full z-10 top-0">
+        <a href="/" class="text-red-600 font-bold text-2xl">Food Portal Admin</a>
+        </nav>
 
-    <section class="p-10">
-        <h1 class="text-3xl font-bold mb-5">Orders</h1>
-        <table class="min-w-full bg-white mb-10 border">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="py-2 px-4 border">Order ID</th>
-                    <th class="py-2 px-4 border">Food</th>
-                    <th class="py-2 px-4 border">Customer</th>
-                    <th class="py-2 px-4 border">Quantity</th>
-                    <th class="py-2 px-4 border">Date</th>
-                    <th class="py-2 px-4 border">Status</th>
-                    <th class="py-2 px-4 border">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% orders.forEach(order=> { %>
-                    <tr>
-                        <td class="py-2 px-4 border">
-                            <%= order.order_id %>
-                        </td>
-                        <td class="py-2 px-4 border">
-                            <%= order.food_name %>
-                        </td>
-                        <td class="py-2 px-4 border">
-                            <%= order.customer_name %>
-                        </td>
-                        <td class="py-2 px-4 border">
-                            <%= order.quantity %>
-                        </td>
-                        <td class="py-2 px-4 border">
-                            <%= order.order_date ? new Date(order.order_date).toISOString().slice(0, 10) : 'N/A' %>
-                        </td>
-                        <td class="py-2 px-4 border">
-                            <%= order.status %>
-                        </td>
-                        <td class="py-2 px-4 border">
-                            <% if (order.status !=="Completed" ) { %>
-                                <form action="/admin/complete-order/<%= order.order_id %>" method="POST"
-                                    class="inline-block">
-                                    <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded">
-                                        Complete
-                                    </button>
-                                </form>
-                                <% } else { %>
-                                    <span class="text-green-600 font-bold">Completed</span>
-                                    <% } %>
-                        </td>
-                    </tr>
+    <div class="flex flex-col md:flex-row mt-16">
+        <aside class="w-full md:w-64 bg-gray-800 text-white p-4 space-y-4 md:h-screen sticky top-16">
+            <h2 class="text-xl font-semibold mb-4">Admin Menu</h2>
+            <nav>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#orders"
+                            class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">
+                            Orders
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#add-food"
+                            class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">
+                            Add Food
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#delete-food"
+                            class="block py-2 px-4 rounded hover:bg-gray-700 transition duration-200">
+                            Delete Food
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10">
+            <section id="orders" class="bg-white shadow-lg rounded-lg p-6 mb-8">
+                <h1 class="text-3xl font-bold mb-6 text-gray-800">Orders Management</h1>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="py-3 px-5 border-b border-gray-200 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Order ID
+                                </th>
+                                <th class="py-3 px-5 border-b border-gray-200 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Food
+                                </th>
+                                <th class="py-3 px-5 border-b border-gray-200 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Customer
+                                </th>
+                                <th class="py-3 px-5 border-b border-gray-200 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Quantity
+                                </th>
+                                <th class="py-3 px-5 border-b border-gray-200 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th class="py-3 px-5 border-b border-gray-200 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th class="py-3 px-5 border-b border-gray-200 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (typeof orders !== 'undefined' && orders.length > 0) { %>
+                            <% orders.forEach(order=> { %>
+                                <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
+                                    <td class="py-3 px-5 border-b border-gray-200 text-sm text-gray-900">
+                                        <%= order.order_id %>
+                                    </td>
+                                    <td class="py-3 px-5 border-b border-gray-200 text-sm text-gray-900">
+                                        <%= order.food_name %>
+                                    </td>
+                                    <td class="py-3 px-5 border-b border-gray-200 text-sm text-gray-900">
+                                        <%= order.customer_name %>
+                                    </td>
+                                    <td class="py-3 px-5 border-b border-gray-200 text-sm text-gray-900">
+                                        <%= order.quantity %>
+                                    </td>
+                                    <td class="py-3 px-5 border-b border-gray-200 text-sm text-gray-900">
+                                        <%= order.order_date ? new Date(order.order_date).toISOString().slice(0, 10) : 'N/A' %>
+                                    </td>
+                                    <td class="py-3 px-5 border-b border-gray-200 text-sm text-gray-900">
+                                        <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                            <% if (order.status === 'Completed') { %> bg-green-200 text-green-800
+                                            <% } else if (order.status === 'Pending') { %> bg-yellow-200 text-yellow-800
+                                            <% } else { %> bg-blue-200 text-blue-800
+                                            <% } %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-5 border-b border-gray-200 text-sm">
+                                        <% if (order.status !== "Completed" ) { %>
+                                        <form action="/admin/complete-order/<%= order.order_id %>" method="POST"
+                                            class="inline-block">
+                                            <button type="submit"
+                                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200 ease-in-out">
+                                                Complete
+                                            </button>
+                                        </form>
+                                        <% } else { %>
+                                        <span class="text-green-600 font-semibold">Completed</span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" class="py-4 px-5 text-center text-gray-500">No orders to display.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="add-food" class="bg-white shadow-lg rounded-lg p-6 mb-8">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Add New Food Item</h2>
+                <form action="/admin/add-food" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <div>
+                        <label for="food-name" class="block text-sm font-medium text-gray-700">Food Name</label>
+                        <input type="text" name="name" id="food-name" placeholder="Delicious Burger"
+                            class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                            required>
+                    </div>
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea name="description" id="description" placeholder="A juicy burger with fresh ingredients..."
+                            rows="4"
+                            class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700">Price</label>
+                        <input type="number" name="price" id="price" placeholder="12.99" step="0.01"
+                            class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                            required>
+                    </div>
+                    <div>
+                        <label for="image" class="block text-sm font-medium text-gray-700">Food Image</label>
+                        <input type="file" name="image" id="image"
+                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100">
+                    </div>
+                    <button type="submit"
+                        class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-md text-base font-medium shadow-md transition duration-200 ease-in-out">
+                        Add Food
+                    </button>
+                </form>
+            </section>
+
+            <section id="delete-food" class="bg-white shadow-lg rounded-lg p-6">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Delete Food Item</h2>
+                <ul class="space-y-3">
+                    <% if (typeof foods !== 'undefined' && foods.length > 0) { %>
+                    <% foods.forEach(food=> { %>
+                        <li class="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200">
+                            <span class="text-gray-800 font-medium"><%= food.name %></span>
+                            <form action="/admin/delete-food/<%= food.id %>" method="GET"
+                                onsubmit="return confirm('Are you sure you want to delete <%= food.name %>?');"
+                                class="inline">
+                                <button type="submit"
+                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm font-medium shadow transition duration-200 ease-in-out">
+                                    Delete
+                                </button>
+                            </form>
+                        </li>
                     <% }) %>
-            </tbody>
-        </table>
-
-        <h2 class="text-2xl font-bold mb-3">Add Food</h2>
-        <form action="/admin/add-food" method="POST" enctype="multipart/form-data" class="space-y-4">
-            <input type="text" name="name" placeholder="Food Name" class="w-full p-2 border rounded" required>
-            <textarea name="description" placeholder="Description" class="w-full p-2 border rounded"></textarea>
-            <input type="number" name="price" placeholder="Price" step="0.01" class="w-full p-2 border rounded"
-                required>
-            <input type="file" name="image" class="w-full p-2 border rounded">
-            <button class="bg-red-500 text-white px-4 py-2 rounded">Add Food</button>
-        </form>
-
-        <h2 class="text-2xl font-bold mt-10 mb-3">Delete Food</h2>
-        <ul class="space-y-2">
-            <% foods.forEach(food=> { %>
-                <li>
-                    <form action="/admin/delete-food/<%= food.id %>" method="GET"
-                        onsubmit="return confirm('Are you sure you want to delete <%= food.name %>?');" class="inline">
-                        <button type="submit"
-                            class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded shadow transition">
-                            Delete <%= food.name %>
-                        </button>
-                    </form>
-                </li>
-                <% }) %>
-        </ul>
-
-    </section>
+                    <% } else { %>
+                        <li class="text-gray-500 text-center">No food items to display.</li>
+                    <% } %>
+                </ul>
+            </section>
+        </main>
+    </div>
 </body>
 
 </html>
