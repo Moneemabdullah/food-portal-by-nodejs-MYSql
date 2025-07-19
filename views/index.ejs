@@ -1,33 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
-    <title>Food Portal</title>
+    <title>Food Portal - Delicious Food Delivered</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+    <style>
+        /* Custom styles for animations and refined effects */
+        .card-hover-effect:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .card-image-hover {
+            transition: transform 0.3s ease-in-out;
+        }
+        .card-hover-effect:hover .card-image-hover {
+            transform: scale(1.05);
+        }
+        .text-scale-up {
+            animation: scaleUp 1s ease-out forwards;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        @keyframes scaleUp {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .fade-in-slide-up {
+            animation: fadeInSlideUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeInSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
-
-<body class="bg-gray-50">
-    <nav class="bg-white shadow p-4 flex justify-between">
-        <a href="/" class="text-2xl text-red-500 font-bold">Food Portal</a>
-        <a href="/admin" class="text-gray-700">Admin</a>
+<body class="bg-gray-50 font-sans">
+    <nav class="bg-white shadow-lg p-4 flex justify-between items-center z-10 relative">
+        <a href="/" class="text-4xl text-red-700 font-extrabold tracking-tight hover:text-red-800 transition duration-300">Food Portal</a>
+        <a href="/admin" class="text-lg text-gray-700 hover:text-red-600 transition duration-300 font-medium">Admin Dashboard</a>
     </nav>
 
-    <section class="p-10 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <% foods.forEach(food=> { %>
-            <div class="bg-white p-4 rounded shadow">
-                <img src="/images/<%= food.image_url %>" class="w-full h-40 object-cover rounded mb-3" />
-                <h2 class="text-xl font-bold">
-                    <%= food.name %>
-                </h2>
-                <p class="text-gray-700">$<%= Number(food.price).toFixed(2) %>
-
-                </p>
-                <a href="/food/<%= food.id %>" class="inline-block mt-2 px-3 py-1 bg-red-500 text-white rounded">View
-                    Details</a>
+    <header class="relative w-full h-[30rem] md:h-[36rem] overflow-hidden">
+        <div id="controls-carousel" class="relative w-full h-full" data-carousel="slide" data-interval="5000">
+            <div class="relative h-full overflow-hidden">
+                <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                    <img src="https://i.pinimg.com/736x/58/2d/c4/582dc4bcf7222205812391e8d7ce3cfd.jpg" class="absolute block w-full h-full object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" alt="Delicious burger" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex items-center justify-center p-4">
+                        <h1 class="text-5xl md:text-6xl font-extrabold text-white text-center drop-shadow-2xl leading-tight text-scale-up">Taste the Difference</h1>
+                    </div>
+                </div>
+                <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                    <img src="https://i.pinimg.com/736x/62/21/fb/6221fba7ef5d11bf5f58863c44d14a00.jpg" class="absolute block w-full h-full object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" alt="Fresh ingredients salad" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex items-center justify-center p-4">
+                        <h1 class="text-5xl md:text-6xl font-extrabold text-white text-center drop-shadow-2xl leading-tight text-scale-up">Fresh Ingredients, Amazing Taste</h1>
+                    </div>
+                </div>
+                <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                    <img src="https://i.pinimg.com/736x/4b/b1/cd/4bb1cd1316c7fe75a2e3173d17e6535e.jpg" class="absolute block w-full h-full object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" alt="Fine dining dessert" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex items-center justify-center p-4">
+                        <h1 class="text-5xl md:text-6xl font-extrabold text-white text-center drop-shadow-2xl leading-tight text-scale-up">An Unforgettable Culinary Journey</h1>
+                    </div>
+                </div>
+                <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                    <img src="https://i.pinimg.com/736x/0b/bb/e8/0bbbe8435a1373f6564377a6059cb710.jpg" class="absolute block w-full h-full object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" alt="Food delivery" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex items-center justify-center p-4">
+                        <h1 class="text-5xl md:text-6xl font-extrabold text-white text-center drop-shadow-2xl leading-tight text-scale-up">Delivered Right to Your Door</h1>
+                    </div>
+                </div>
+                <div class="hidden duration-700 ease-in-out" data-carousel-item>
+                    <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?fit=crop&w=1400&q=80" class="absolute block w-full h-full object-cover top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" alt="Various delicious dishes" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex items-center justify-center p-4">
+                        <h1 class="text-5xl md:text-6xl font-extrabold text-white text-center drop-shadow-2xl leading-tight text-scale-up">Your Hunger, Our Priority</h1>
+                    </div>
+                </div>
             </div>
-            <% }) %>
-    </section>
-</body>
 
+            <div class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1" data-carousel-slide-to="0"></button>
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2" data-carousel-slide-to="1"></button>
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 3" data-carousel-slide-to="2"></button>
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 4" data-carousel-slide-to="3"></button>
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 5" data-carousel-slide-to="4"></button>
+            </div>
+
+            <button type="button" class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
+                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 hover:bg-white/50 group-focus:ring-4 group-focus:ring-white transition duration-300">
+                    <svg class="w-4 h-4 text-white rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+                    </svg>
+                    <span class="sr-only">Previous</span>
+                </span>
+            </button>
+            <button type="button" class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
+                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 hover:bg-white/50 group-focus:ring-4 group-focus:ring-white transition duration-300">
+                    <svg class="w-4 h-4 text-white rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                    </svg>
+                    <span class="sr-only">Next</span>
+                </span>
+            </button>
+        </div>
+    </header>
+
+    <section class="py-16 px-6 container mx-auto">
+        <h2 class="text-4xl md:text-5xl font-extrabold text-center text-gray-800 mb-12 fade-in-slide-up">Our Delicious Offerings</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+            <% if (typeof foods !== 'undefined' && foods.length > 0) { %>
+                <% foods.forEach(food => { %>
+                    <div class="bg-white rounded-xl shadow-lg transition-all duration-300 card-hover-effect overflow-hidden">
+                        <img src="/images/<%= food.image_url %>" alt="<%= food.name %>" class="w-full h-56 object-cover rounded-t-xl card-image-hover" />
+                        <div class="p-6">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2 truncate">
+                                <%= food.name %>
+                            </h3>
+                            <p class="text-red-600 text-3xl font-extrabold mb-4">$<%= Number(food.price).toFixed(2) %></p>
+                            <a href="/food/<%= food.id %>" class="inline-block w-full text-center px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300 transform hover:scale-105">View Details</a>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="col-span-full text-center text-gray-600 text-xl">No food items available yet. Please check back later!</p>
+            <% } %>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div class="footer-section">
+                <h3 class="text-2xl font-bold mb-4 text-red-500">Food Portal</h3>
+                <p class="text-gray-400 leading-relaxed">Your one-stop destination for ordering delicious food online. We partner with the best restaurants to bring you an unparalleled culinary experience.</p>
+            </div>
+            <div class="footer-section">
+                <h3 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Quick Links</h3>
+                <ul class="space-y-3">
+                    <li><a href="/" class="text-gray-400 hover:text-red-500 transition duration-300 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg> Home</a></li>
+                    <li><a href="/about" class="text-gray-400 hover:text-red-500 transition duration-300 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg> About Us</a></li>
+                    <li><a href="/contact" class="text-gray-400 hover:text-red-500 transition duration-300 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg> Contact</a></li>
+                    <li><a href="/privacy" class="text-gray-400 hover:text-red-500 transition duration-300 flex items-center"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg> Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3 class="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Contact Us</h3>
+                <p class="text-gray-400 mb-2">123 Food Street, Culinary City, FC 12345</p>
+                <p class="text-gray-400 mb-2">Email: <a href="mailto:info@foodportal.com" class="text-red-400 hover:text-red-500 transition duration-300">info@foodportal.com</a></p>
+                <p class="text-gray-400 mb-4">Phone: <a href="tel:+1234567890" class="text-red-400 hover:text-red-500 transition duration-300">(123) 456-7890</a></p>
+                <div class="flex space-x-5 mt-4">
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition duration-300 transform hover:scale-110" aria-label="Facebook"><img src="https://img.icons8.com/ios-filled/28/ffffff/facebook-new.png" alt="Facebook" class="w-7 h-7"></a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition duration-300 transform hover:scale-110" aria-label="Twitter"><img src="https://img.icons8.com/ios-filled/28/ffffff/twitter--v1.png" alt="Twitter" class="w-7 h-7"></a>
+                    <a href="#" class="text-gray-400 hover:text-red-500 transition duration-300 transform hover:scale-110" aria-label="Instagram"><img src="https://img.icons8.com/ios-filled/28/ffffff/instagram-new--v1.png" alt="Instagram" class="w-7 h-7"></a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center text-gray-500 mt-12 border-t border-gray-800 pt-8 text-sm">
+            &copy; 2025 Food Portal. All rights reserved. Designed with <span class="text-red-500">&hearts;</span>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    <script>
+        // Trigger animations on specific elements after the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const heading = document.querySelector('.fade-in-slide-up');
+            if (heading) {
+                heading.style.animationDelay = '0.2s';
+                heading.classList.add('fade-in-slide-up');
+            }
+
+            const carouselTitles = document.querySelectorAll('.text-scale-up');
+            carouselTitles.forEach((title, index) => {
+                title.style.animationDelay = `${0.5 + index * 0.1}s`;
+                title.classList.add('text-scale-up');
+            });
+
+            // If you want to animate food cards individually on load, you can add similar logic here
+            // const foodCards = document.querySelectorAll('.card-hover-effect');
+            // foodCards.forEach((card, index) => {
+            //     card.style.animationDelay = `${0.8 + index * 0.05}s`;
+            //     card.classList.add('fade-in-slide-up'); // or another animation class
+            // });
+        });
+    </script>
+</body>
 </html>

@@ -146,6 +146,41 @@ app.get("/admin/delete-food/:id", async (req, res) => {
     }
 });
 
+// Add food
+app.post("/admin/add-food", upload.single("image"), async (req, res) => {
+    const { name, description, price } = req.body;
+    const image_url = req.file ? req.file.filename : "default.jpg";
+
+    try {
+        await sql`
+            INSERT INTO foods (name, description, price, image_url)
+            VALUES (${name}, ${description}, ${price}, ${image_url})
+        `;
+        res.redirect("/admin");
+    } catch (err) {
+        res.send(err);
+    }
+});
+
+// Admin - Edit food
+app.get("/admin/edit-food/:id", (req, res) => {
+    const foodId = req.params.id;
+    db.query("SELECT * FROM foods WHERE id = ?", [foodId], (err, result) => {
+        if (err || result.length === 0) return res.send("Food not found");
+        res.render("edit_food", { food: result[0] });
+    });
+});
+
+// Delete food
+app.get("/admin/delete-food/:id", async (req, res) => {
+    try {
+        await sql`DELETE FROM foods WHERE id = ${req.params.id}`;
+        res.redirect("/admin");
+    } catch (err) {
+        res.send(err);
+    }
+});
+
 app.listen(3000, () => {
     console.log("Server running on http://localhost:3000");
 });
