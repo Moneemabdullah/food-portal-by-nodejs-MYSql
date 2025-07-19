@@ -9,7 +9,7 @@ const app = express();
 require("dotenv").config();
 
 const db = mysql.createConnection({
-    host: process.env.Host,
+    host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
@@ -134,6 +134,28 @@ app.post("/admin/complete-order/:id", (req, res) => {
     );
 });
 
+app.post("/admin/update-food/:id", upload.single("image"), (req, res) => {
+    const foodId = req.params.id;
+    const { name, description, price } = req.body;
+    let updateQuery, values;
+
+    if (req.file) {
+        const image_url = req.file.filename;
+        updateQuery =
+            "UPDATE foods SET name = ?, description = ?, price = ?, image_url = ? WHERE id = ?";
+        values = [name, description, price, image_url, foodId];
+    } else {
+        updateQuery =
+            "UPDATE foods SET name = ?, description = ?, price = ? WHERE id = ?";
+        values = [name, description, price, foodId];
+    }
+
+    db.query(updateQuery, values, (err) => {
+        if (err) return res.send(err);
+        res.redirect("/admin");
+    });
+});
+
 // Admin - Add food
 app.post("/admin/add-food", upload.single("image"), (req, res) => {
     const { name, description, price } = req.body;
@@ -147,6 +169,15 @@ app.post("/admin/add-food", upload.single("image"), (req, res) => {
             res.redirect("/admin");
         }
     );
+});
+
+// Admin - Edit food
+app.get("/admin/edit-food/:id", (req, res) => {
+    const foodId = req.params.id;
+    db.query("SELECT * FROM foods WHERE id = ?", [foodId], (err, result) => {
+        if (err || result.length === 0) return res.send("Food not found");
+        res.render("edit_food", { food: result[0] });
+    });
 });
 
 // Admin - Delete food
