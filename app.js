@@ -1,14 +1,15 @@
 const express = require("express");
-const mysql = require("mysql2");
+const postgres = require("postgres");
 const bodyParser = require("body-parser");
 const path = require("path");
 const multer = require("multer");
+require("dotenv").config();
 
 const app = express();
 
-require("dotenv").config();
-
-const db = mysql.createConnection({
+// PostgreSQL client setup
+const sql = postgres({
+    url: process.env.DB_URL, // you can also use individual keys below
     host: process.env.Host,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -16,20 +17,12 @@ const db = mysql.createConnection({
     port: process.env.DB_PORT,
 });
 
-db.connect((err) => {
-    if (err) {
-        console.error(err);
-        return;
-    }
-    console.log("MySQL connected");
-});
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 
-// Multer config for image uploads
+// Multer config
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "./public/images");
@@ -43,118 +36,114 @@ const upload = multer({ storage });
 // ROUTES
 
 // Home page - list all foods
-app.get("/", (req, res) => {
-    db.query("SELECT * FROM foods", (err, foods) => {
-        if (err) return res.send(err);
+app.get("/", async (req, res) => {
+    try {
+        const foods = await sql`SELECT * FROM foods`;
         res.render("index", { foods });
-    });
+    } catch (err) {
+        res.send(err);
+    }
 });
 
 // Single food page
-app.get("/food/:id", (req, res) => {
-    db.query(
-        "SELECT * FROM foods WHERE id = ?",
-        [req.params.id],
-        (err, result) => {
-            if (err) return res.send(err);
-            const food = result[0];
-            if (food) {
-                food.price = parseFloat(food.price);
-            }
-            // Pass query object into EJS
-            res.render("food", { food, query: req.query });
+app.get("/food/:id", async (req, res) => {
+    try {
+        const result =
+            await sql`SELECT * FROM foods WHERE id = ${req.params.id}`;
+        const food = result[0];
+        if (food) {
+            food.price = parseFloat(food.price);
         }
-    );
+        res.render("food", { food, query: req.query });
+    } catch (err) {
+        res.send(err);
+    }
 });
 
 // Place order
-app.post("/order", (req, res) => {
+app.post("/order", async (req, res) => {
     const { food_id, quantity, customer_name, email, address } = req.body;
     const order_date = new Date();
 
-    db.query(
-        "INSERT INTO customers (name, email, address) VALUES (?, ?, ?)",
-        [customer_name, email, address],
-        (err, result) => {
-            if (err) return res.send(err);
-            const customerId = result.insertId;
+    try {
+        const customerResult = await sql`
+            INSERT INTO customers (name, email, address)
+            VALUES (${customer_name}, ${email}, ${address})
+            RETURNING id
+        `;
+        const customerId = customerResult[0].id;
 
-            db.query(
-                "INSERT INTO orders (customer_id, food_id, quantity, order_date, status) VALUES (?, ?, ?, ?, ?)",
-                [customerId, food_id, quantity, order_date, "Pending"],
-                (err) => {
-                    if (err) return res.send(err);
-                    res.redirect(`/food/${food_id}?success=1`);
-                }
-            );
-        }
-    );
+        await sql`
+            INSERT INTO orders (customer_id, food_id, quantity, order_date, status)
+            VALUES (${customerId}, ${food_id}, ${quantity}, ${order_date}, 'Pending')
+        `;
+
+        res.redirect(`/food/${food_id}?success=1`);
+    } catch (err) {
+        res.send(err);
+    }
 });
 
 // Admin dashboard
-// GET admin page - fetch both orders and foods
-app.get("/admin", (req, res) => {
-    const ordersQuery = `
-      SELECT
-        orders.id AS order_id,
-        foods.name AS food_name,
-        customers.name AS customer_name,
-        orders.quantity,
-        orders.order_date,
-        orders.status
-      FROM orders
-      JOIN foods ON orders.food_id = foods.id
-      JOIN customers ON orders.customer_id = customers.id
-    `;
+app.get("/admin", async (req, res) => {
+    try {
+        const orders = await sql`
+            SELECT
+                orders.id AS order_id,
+                foods.name AS food_name,
+                customers.name AS customer_name,
+                orders.quantity,
+                orders.order_date,
+                orders.status
+            FROM orders
+            JOIN foods ON orders.food_id = foods.id
+            JOIN customers ON orders.customer_id = customers.id
+        `;
 
-    const foodsQuery = `SELECT * FROM foods`;
+        const foods = await sql`SELECT * FROM foods`;
 
-    db.query(ordersQuery, (err, orders) => {
-        if (err) return res.send(err);
-
-        db.query(foodsQuery, (err2, foods) => {
-            if (err2) return res.send(err2);
-
-            res.render("admin", { orders, foods });
-        });
-    });
+        res.render("admin", { orders, foods });
+    } catch (err) {
+        res.send(err);
+    }
 });
 
-// POST route to mark order complete
-app.post("/admin/complete-order/:id", (req, res) => {
-    const orderId = req.params.id;
-
-    db.query(
-        "UPDATE orders SET status = ? WHERE id = ?",
-        ["Completed", orderId],
-        (err) => {
-            if (err) return res.send(err);
-            res.redirect("/admin");
-        }
-    );
+// Mark order complete
+app.post("/admin/complete-order/:id", async (req, res) => {
+    try {
+        await sql`
+            UPDATE orders SET status = 'Completed' WHERE id = ${req.params.id}
+        `;
+        res.redirect("/admin");
+    } catch (err) {
+        res.send(err);
+    }
 });
 
-// Admin - Add food
-app.post("/admin/add-food", upload.single("image"), (req, res) => {
+// Add food
+app.post("/admin/add-food", upload.single("image"), async (req, res) => {
     const { name, description, price } = req.body;
     const image_url = req.file ? req.file.filename : "default.jpg";
 
-    db.query(
-        "INSERT INTO foods (name, description, price, image_url) VALUES (?, ?, ?, ?)",
-        [name, description, price, image_url],
-        (err) => {
-            if (err) return res.send(err);
-            res.redirect("/admin");
-        }
-    );
+    try {
+        await sql`
+            INSERT INTO foods (name, description, price, image_url)
+            VALUES (${name}, ${description}, ${price}, ${image_url})
+        `;
+        res.redirect("/admin");
+    } catch (err) {
+        res.send(err);
+    }
 });
 
-// Admin - Delete food
-app.get("/admin/delete-food/:id", (req, res) => {
-    db.query("DELETE FROM foods WHERE id = ?", [req.params.id], (err) => {
-        if (err) return res.send(err);
+// Delete food
+app.get("/admin/delete-food/:id", async (req, res) => {
+    try {
+        await sql`DELETE FROM foods WHERE id = ${req.params.id}`;
         res.redirect("/admin");
-    });
+    } catch (err) {
+        res.send(err);
+    }
 });
 
 app.listen(3000, () => {
